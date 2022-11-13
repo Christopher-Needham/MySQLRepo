@@ -13,25 +13,28 @@ import projects.service.ProjectService;
 //Main app to capture user input to populate data in SQL Database
 
 public class ProjectsApp {
-		//@formatter:off
+	
+		private Scanner scanner = new Scanner(System.in);
+		private ProjectService projectService = new ProjectService();
+		private Project curProject;
+	
+	
+	//@formatter:off
 		private List<String> operations = List.of(
-				"1) Add a Project"
+				"1) Add a Project",
+				"2) List Projects",
+				"3) Select a project"
 				);
 		//@formatter:on
 		
-		private Scanner scanner = new Scanner(System.in);
+		
 			
 	public static void main(String[] args) {
 		
 		new ProjectsApp().processUserSelections();
-		
-		
 	}
-	private ProjectService projectService() {
-		return projectService();
-		
-	}
-
+	
+	
 	//This method provides the user a selection, captures his/her input, and closes when finished. 
 	
 	private void processUserSelections() {
@@ -46,7 +49,13 @@ public class ProjectsApp {
 					break;
 					case 1:
 						createProject();
-					break;
+						break;
+					case 2:
+						listProjects();
+						break;
+					case 3:
+						selectProject();
+						break;
 					default:
 						System.out.println("\n" + selection + " is not a valid selection. Try again.");
 					break;
@@ -61,6 +70,30 @@ public class ProjectsApp {
 		
 	}
 	
+	private void selectProject() {
+			listProjects();
+			
+			Integer projectId = getIntInput("Enter a project ID to select a project");
+			
+			curProject = null;
+			
+			curProject = projectService.fetchProjectById(projectId);
+			
+			if(curProject == null) {
+				System.out.println("Invalid project ID selected");
+			}
+			
+	}
+	
+		
+		private void listProjects() {
+		List<Project> projects = projectService.fetchAllProjects();
+		
+		System.out.println("\nProjects:");
+		
+		projects.forEach(project -> System.out
+				.println("  " + project.getProjectId() + ": " + project.getProjectName()));
+	}
 		
 		/**This method prints the options to the user and sets that data 
 		 * as the proper inputs. 
@@ -81,7 +114,7 @@ public class ProjectsApp {
 		project.setDifficulty(difficulty);
 		project.setNotes(notes);
 		
-		Project dbProject = ProjectService.addProject(project);
+		Project dbProject = projectService.addProject(project);
 		System.out.println("You have successfully created project: " + dbProject);
 		
 		
@@ -134,6 +167,13 @@ public class ProjectsApp {
 	private void printOperations() {
 		System.out.println("\nThese are the available selections. Press the Enter key to quit:");
 		operations.forEach(line -> System.out.println(" " + line));
+		
+		if(Objects.isNull(curProject)) {
+			System.out.println("\nYou are not working with a project");
+		}
+		else {
+			System.out.println("\nYou are working with project: " + curProject);
+		}
 		
 	}
 	/**Gathers data from the user and gives errors when that data isn't correct

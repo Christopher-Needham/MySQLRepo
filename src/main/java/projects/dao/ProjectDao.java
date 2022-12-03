@@ -174,7 +174,7 @@ public class ProjectDao extends DaoBase {
 
 
 	private Collection<? extends Step> fetchStepsForProject(Connection conn, Integer projectId)throws SQLException {
-		//@formatter:off
+				//@formatter:off
 				String sql = ""
 						+ "SELECT * FROM " + STEP_TABLE + " WHERE project_id = ?";
 				//@formatter:on
@@ -215,6 +215,87 @@ public class ProjectDao extends DaoBase {
 			}
 			
 		}
+	}
+
+	/**
+	 * This method creates the sql statement to update the project in the server
+	 * @param project
+	 * @return boolean
+	 */
+
+	public boolean modifyProjectDetails(Project project) {
+		//@formatter:off
+		String sql = ""
+				+ "UPDATE " + PROJECT_TABLE + " SET "
+				+ "project_name = ?, "
+				+ "estimated_hours = ?, "
+				+ "actual_hours = ?, "
+				+ "difficulty = ?, "
+				+ "notes = ? "
+				+ "WHERE project_id = ?";
+		//@formatter:on
+		
+		try(Connection conn = DbConnection.getConnection()){
+			startTransaction(conn);
+			
+				try(PreparedStatement stmt = conn.prepareStatement(sql)){
+					setParameter(stmt, 1, project.getProjectName(), String.class);
+					setParameter(stmt, 2, project.getEstimatedHours(), BigDecimal.class);
+					setParameter(stmt, 3, project.getActualHours(), BigDecimal.class);
+					setParameter(stmt, 4, project.getDifficulty(), Integer.class);
+					setParameter(stmt, 5, project.getNotes(), String.class);
+					setParameter(stmt, 6, project.getProjectId(), Integer.class);
+					
+					boolean modified = stmt.executeUpdate() == 1;
+					commitTransaction(conn);
+					
+					return modified;
+					
+				
+			 }
+				catch(Exception e) {
+					rollbackTransaction(conn);
+					throw new DbException(e);
+				}
+		}
+		catch(SQLException e) {
+			throw new DbException(e);
+		}
+				
+	}
+
+
+	/**
+	 * This method creates the sql statement to delete the project on the server. 
+	 * @param projectId
+	 * @return boolean
+	 */
+	public boolean deleteProject(Integer projectId) {
+		
+		String sql = ""
+				+ "DELETE FROM " + PROJECT_TABLE + " WHERE project_id = ?";
+		
+			try (Connection conn = DbConnection.getConnection()){
+				startTransaction(conn);
+				try(PreparedStatement stmt = conn.prepareStatement(sql)){
+					setParameter(stmt, 1, projectId, Integer.class);
+					
+					boolean deleted = stmt.executeUpdate() == 1;
+					commitTransaction(conn);
+					
+					return deleted;
+					
+				}
+				catch(Exception e) {
+		rollbackTransaction(conn);
+					throw new DbException(e);
+				}
+				
+			}
+			catch(SQLException e) {
+				throw new DbException(e);
+			}
+		
 	}
 
 	

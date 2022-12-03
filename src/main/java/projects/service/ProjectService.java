@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import projects.dao.ProjectDao;
 import projects.entity.Project;
+import projects.exception.DbException;
 
 public class ProjectService {
 	
@@ -30,6 +31,34 @@ public class ProjectService {
 
 		public List<Project> fetchAllProjects() {
 			return projectDao.fetchAllProjects();
+		}
+
+
+		/**
+		 * This method relays between the Dao layer and the app layer
+		 * @param project
+		 */
+		public void modifyObjectDetails(Project project) {
+			if(!projectDao.modifyProjectDetails(project)){
+				throw new DbException("Project with ID="
+						+ project.getProjectId() + " does not exist.");
+			}
+			
+			
+		}
+
+		/**
+		 * This method is used relay between the Dao layer and the app layer
+		 * 
+		 * @param projectId
+		 */
+
+		public void deleteProject(Integer projectId) {
+			if (!projectDao.deleteProject(projectId)) {
+				throw new DbException("Project with ID="
+						+ projectId + " does not exist.");
+			}
+			
 		}
 	
 }
